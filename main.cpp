@@ -211,9 +211,36 @@ int main() {
 
   // PROJECT Question 5
   //
-  // matrix<3, 3> B{ {...}, {...}, {...} };   // Stochastic matrix
-  // vector u3{ 0.2, 0.3, 0.5 };    // Stochastic vector
-  // std::cout << markov_chain<3>( B, u3, 1e-5, 1000 ) << std::endl;
+  matrix<3, 3> B{ 
+{0.2458, 0.2494, 0.1856}, 
+{0.4655, 0.4431, 0.7145}, 
+{0.2886, 0.3075, 0.0998} 
+};   
+   // Stochastic matrix
+  vec<3> u3{ 0.2, 0.3, 0.5 }; // Stochastic vector
+  std::cout << markov_chain<3>( B, u3, 1e-4, 1000 ) << std::endl; // increased eps_step by a magnitude of 10 
+
+matrix<4, 4> C{ 
+{0.1727, 0.2290, 0.2881, 0.1979}, 
+{0.3252, 0.4061, 0.1677, 0.2793}, 
+{0.3622, 0.2278, 0.3518, 0.3910}, 
+{0.1398, 0.1370, 0.1925, 0.1318}
+};   
+   // Stochastic matrix
+  vec<4> u4{ 0.2, 0.3, 0.4, 0.1 }; // Stochastic vector
+  std::cout << markov_chain<4>( C, u4, 1e-4, 1000 ) << std::endl; // increased eps_step by a magnitude of 10 
+
+
+matrix<5, 5> D{ 
+{0.0172, 0.2715, 0.0358, 0.1078, 0.1463}, 
+{0.3958, 0.1452, 0.4157, 0.2371, 0.0512}, 
+{0.0770, 0.2494, 0.2778, 0.2277, 0.3718}, 
+{0.2714, 0.3262, 0.0986, 0.2929, 0.0396}, 
+{0.2386, 0.0077, 0.1721, 0.1345, 0.3911}
+};   
+   // Stochastic matrix
+  vec<5> u5{ 0.1, 0.1, 0.2, 0.3, 0.3 }; // Stochastic vector
+  std::cout << markov_chain<5>( D, u5, 1e-4, 1000 ) << std::endl; // increased eps_step by a magnitude of 10
 
   return 0;
 }
@@ -291,6 +318,34 @@ vec<n> markov_chain(
   double eps_step,
   unsigned int max_iterations
 ) {
+  double sum; 
+  for (int i=0; i<n;i++) {
+    sum=0;
+    for (int k=0; k<n;k++) {
+      if (A ( k, i ) < 0) {
+          throw std::invalid_argument{"Invalid Syntax"};
+        }
+      sum += A ( k,i );  
+    }
+
+    if (std::abs(1 - sum) > n*eps_step) { 
+      throw std::invalid_argument{"Invalid Syntax"};
+    }
+  }
+  for ( unsigned int k{1}; k <= max_iterations; ++k ) {
+    vec<n> v1{ A*v0 };
+
+    if ( norm( v1 - v0 ) < eps_step ) {
+      return v1;
+    } else {
+      v0 = v1;
+    }
+  }
+
+  throw std::runtime_error{
+    "Fixed-point iteration did not converge"
+  };
+
   // Ensure that 'A' represents a stocastic matrix
   //  - All entries are non-negative
   //  - All of the rows add up to '1.0' with an
