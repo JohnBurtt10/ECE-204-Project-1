@@ -323,13 +323,13 @@ vec<n> markov_chain(
     sum=0;
     for (int k=0; k<n;k++) {
       if (A ( k, i ) < 0) {
-          throw std::invalid_argument{"Invalid Syntax"};
+          throw std::invalid_argument{"Not markov chain matrix"};
         }
       sum += A ( k,i );  
     }
 
     if (std::abs(1 - sum) > n*eps_step) { 
-      throw std::invalid_argument{"Invalid Syntax"};
+      throw std::invalid_argument{"Not markov chain matrix"};
     }
   }
   for ( unsigned int k{1}; k <= max_iterations; ++k ) {
